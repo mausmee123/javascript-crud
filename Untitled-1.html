@@ -1,0 +1,274 @@
+<html>  
+<body>  
+<form id="form" onsubmit="event.preventDefault();onFormSubmit();" >  
+
+<p>  
+    <label for="register_name" class="label">Enter name:</label>
+    <input type="text" name="name" value="" id="register_name" style="width:160px"/>
+</p>  
+<p>  
+    <label for="register_password" class="label">Enter password:</label> 
+    <input type="password" name="password" id="register_password" style="width:160px"/>
+</p>  
+<p>  
+    <label for="register_email" class="label">Enter Email:</label> 
+    <input type="email" name="email" value="" id="register_email" style="width:160px"/>  
+</p>
+<p>  
+    <label for="register_gender" class="label">Enter Gender:</label>  
+     
+<input type="radio" name="gender" id="register_gendermale" value="male"/>  
+<label for="register_gendermalee">Male</label>  
+<input type="radio" name="gender" id="register_genderfemale" value="female"/>  
+<label for="register_genderfemalee">Female</label>  
+     
+</p>    
+<p>  
+    <label for="register_vehicle" class="label">Enter vehicle:</label>  
+     
+<input type="checkbox" name="vehicle" id="register_car" value="car" />  
+<label for="register_carr">car</label>  
+<input type="checkbox" name="vehicle" id="register_bike" value="bike"/>  
+<label for="register_bikee">bike</label>  
+     
+</p>
+
+<p>  
+    <label for="register_country">Select Country:</label>  
+    <select name="register_country" id="register_country" style="width:160px">  
+    <option value="" selected="selected">india</option>  
+    <option value="pakistan">pakistan</option>  
+    <option value="africa">africa</option>  
+    <option value="china">china</option>  
+    <option value="other">other</option>  
+	</select>  
+ 
+</p>  
+<p>  
+    <div><input type="submit"  value="register"/>  
+</div> 
+</p>  
+
+</form>  
+
+<br/>
+
+<br/>
+		<div class = "demodata-table">
+                <table class="list">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>password</th>
+                            <th>email</th>
+                            <th>gender</th>
+                            <th>vehicle</th>
+                            <th>country</th>
+							<th>edit</th>
+							<th>delete</th>
+                        </tr>
+                    </thead>
+                    <tbody id="demodataList">
+
+                    </tbody>
+                </table>
+        </div>
+
+<script>
+    
+	var obj = {};
+	var editable = false;
+	var index;	
+		
+	
+		
+		let name = document.getElementById("register_name");
+		let password = document.getElementById("register_password");
+		let email = document.getElementById("register_email");
+		
+		let country = document.getElementById("register_country");
+		let gender = document.getElementByName("gender");
+
+	
+		
+
+		
+		function onFormSubmit(e) {
+
+			obj["name"] = name.value;
+			obj["password"] = password.value;
+			obj["email"] = email.value;
+			obj["register_country"] = country.value;
+
+			var getSelectedValue = document.querySelector('input[name="gender"]:checked');
+			if (getSelectedValue != null) {
+				obj["gender"] = getSelectedValue.value;
+			}
+			else {
+				obj["gender"] = "Not selected";
+			}
+
+			var markedCheckbox = document.getElementsByName('vehicle');
+			// console.log("markedCheckbox", markedCheckbox);
+			let arr = [];
+			for (var checkbox of markedCheckbox) {
+				if (checkbox.checked) {
+					arr.push(checkbox.value)
+				}
+			}
+			obj["vehicle"] = arr;
+	
+
+			if (editable == false) {
+				var crud = JSON.parse(localStorage.getItem("crud"));
+				// console.log(crud)
+				if (crud == undefined) {
+					var crud = [];
+					obj.id = 1;
+					crud.push(obj);
+					localStorage.setItem("crud", JSON.stringify(crud));
+				} else {
+					obj.id = crud[crud.length - 1].id + 1;
+					crud.push(obj);
+					localStorage.setItem("crud", JSON.stringify(crud));
+				}
+
+				document.getElementById("form").reset();
+				document.getElementById("demodataList").innerHTML = "";
+				insert();
+
+			} else {
+				updateData(index);
+			}
+			document.getElementById("form").reset();
+
+		}
+
+		function updateData(index) {
+			editable = false;
+			var crud = JSON.parse(localStorage.getItem("crud"));
+			crud.splice(index, 1, obj);
+			localStorage.setItem("crud", JSON.stringify(crud));
+			// console.log(crud);
+			document.getElementById("demodataList").innerHTML = "";
+			document.getElementById("form").reset();
+			insert();
+		}
+
+		
+
+		//insert form data into table
+		insert();
+		function insert() {
+			var data = JSON.parse(localStorage.getItem("crud"));
+			// console.log(data);
+			data.forEach((ele, i) => {
+				let row = document.createElement("tr");
+				let td1 = document.createElement("td");
+				td1.innerText = ele.Name;
+				row.appendChild(td1);
+				let td2 = document.createElement("td");
+				td2.innerText = ele.password;
+				row.appendChild(td2);
+				let td3 = document.createElement("td");
+				td3.innerText = ele.email;
+				row.appendChild(td3);
+				let td4 = document.createElement("td");
+				td4.innerText = ele.gender;
+				row.appendChild(td4);
+				let td5 = document.createElement("td");
+				td5.innerText = ele.vehicle;
+				row.appendChild(td5);
+				let td6 = document.createElement("td");
+				td6.innerText = ele.register_country;
+				row.appendChild(td6);
+				
+				let td7 = document.createElement("td");
+				let edit = document.createElement("button")
+				edit.setAttribute('id', 'btn');
+				edit.setAttribute('value', 'Edit');
+				edit.setAttribute('class', 'btn');
+				edit.innerText = 'Edit';
+				edit.addEventListener("click", () =>{
+					
+					editForm(i)
+				} );
+				td7.appendChild(edit);
+				row.appendChild(td7);
+
+				let td8 = document.createElement("td");
+				let deleted = document.createElement("button")
+				deleted.setAttribute('id', 'btn2');
+				deleted.setAttribute('value', 'Deleted');
+				deleted.setAttribute('class', 'btn');
+				deleted.innerText = 'Deleted';
+				deleted.addEventListener("click", () => deletedForm(i));
+				td8.appendChild(deleted);
+				row.appendChild(td8);
+				
+				document.getElementById("demodataList").appendChild(row);
+				// console.log(data);
+			})
+		};
+	
+
+		function editForm(i) {
+			
+			editable = true;
+			index = i;
+			document.getElementById("form").reset();
+
+			let crud = JSON.parse(localStorage.getItem("crud"));
+			var savedData = crud[i]; // get and parse the saved data from localStorage
+
+			let formElements = form.elements;
+
+
+			for (const element of formElements) {
+
+				if (element.name in savedData) {
+
+					 if (element.name == "gender") {
+						if (savedData.gender === "male") {
+							register_gendermale.checked = true;
+						} else if (savedData.gender === "female") {
+							register_genderfemale.checked = true;
+							register_genderfemale.value = savedData[element.name];
+						}
+					} 
+					
+					else if (element.name == "vehicle") {
+						if (savedData.vehicle.includes("car")) {
+							document.getElementById("register_car").checked = true;
+						}
+						if (savedData.vehicle.includes("bike")) {
+							document.getElementById("register_bike").checked = true;
+						}
+
+					} 
+					
+					
+					else {
+
+						element.value = savedData[element.name];
+
+						
+					}
+				}
+			}
+		}
+
+		function deletedForm(i) {
+			var crud = JSON.parse(localStorage.getItem("crud"));
+			crud.splice(i, 1);
+			localStorage.setItem("crud", JSON.stringify(crud));
+			updateData();
+		
+		}
+
+</script>
+
+</body>
+</html>  
+
+ 
